@@ -31,7 +31,7 @@ def get_results(images):
                     x = hand_landmarks.landmark[k].x # entre 0 y 1
                     y = hand_landmarks.landmark[k].y
                     points.append([int(x*W), int(y*H)]) # int para dibujar en cv
-                    break
+                    
 
                 points = np.array(points)
                 all_points.append(points)
@@ -42,6 +42,7 @@ def get_results(images):
                         mp_drawing_styles.get_default_hand_landmarks_style(),
                         mp_drawing_styles.get_default_hand_connections_style())
                 results.append(black_image)
+                break
     return results, all_points
 
 
