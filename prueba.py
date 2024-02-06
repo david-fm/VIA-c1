@@ -1,5 +1,5 @@
 import numpy as np
-import mediapipe as mp
+import matplotlib.pyplot as plt
 import cv2 as cv
 import os
 import pickle
@@ -47,40 +47,62 @@ class HandDetector():
     @staticmethod
     def transform( reference, to_transform):
         """Transform the points of to_transform to the reference"""
+        
         reference = np.array(reference)
         to_transform = np.array(to_transform)
         movement = reference[0] - to_transform[0]
         # Translate the points to the origin
         to_transform = to_transform + movement
-        HandDetector.test(to_transform)
+        #HandDetector.test(to_transform, "translated")
         # Rotate the points based on the point 9
         # Change the origin to the point 9
         # TODO Improve
-        point9 = to_transform[9]
-        to_transform = to_transform - point9
-        reference = reference - point9
+        point0 = to_transform[0]
+        to_transform = to_transform - point0
+        reference = reference - point0
         angle = np.arctan2(reference[9][1], reference[9][0]) - np.arctan2(to_transform[9][1], to_transform[9][0]) # angle in radians arctan2(y,x)
-        to_transform = to_transform @ np.array([[np.cos(angle), -np.sin(angle)],[np.sin(angle), np.cos(angle)]]) # REVISAR
-
+        cos = np.cos(angle)
+        sin = np.sin(angle)
+        transformation_matrix = np.array([[cos, -sin],[sin, cos]])
+        to_transform = to_transform @ transformation_matrix
+        #print(f"reference angle: {np.arctan2(reference[9][1], reference[9][0])}")
+        #print(f"to_transform angle: {np.arctan2(to_transform[9][1], to_transform[9][0])}")
+        #print(f"angle: {angle}, cos: {cos}, sin: {sin}")
         # Set the origin back to the original point
-        to_transform = to_transform + point9
+        
         #HandDetector.test(to_transform, "rotated")
+        to_transform = to_transform + point0
+        #HandDetector.test(to_transform, "transformed back origin")
         return to_transform
     @staticmethod
-    def test(transformed, name="test"):
-        
-        image = np.zeros((480,640,3), dtype=np.uint8)
+    def plot(transformed, name="test"):
+        fig, ax = plt.subplots()
         # transform to int
-        t = transformed
-        transformed = transformed.astype(int)
         for i in range(21):
-            cv.circle(image, tuple(transformed[i]), 5, (0,255,255), -1)
+            x, y = transformed[i]
+            ax.plot(x, y)
+            ax.text(x, y, str(i))
 
-        for _, frame in autoStream():
+        conections = [
+            [0,1,2,3,4],
+            [0,5,6,7,8],
+            [9,10,11,12],
+            [13,14,15,16],
+            [0,17,18,19,20],
+            [5,9,13,17]
+        ]
+        # draw lines between points in each array of conections
+        for conections in conections:
+            for i in range(len(conections) - 1):
+                x = [transformed[conections[i]][0], transformed[conections[i+1]][0]]
+                y = [transformed[conections[i]][1], transformed[conections[i+1]][1]]
+                ax.plot(x,y)
+        
+        reference = (1,0)
+        ax.plot(reference[0], reference[1], "o")
 
-            cv.imshow(name, image)
-            if cv.waitKey(1) & 0xFF == ord('q'):
-                break
+        plt.title(name)
+        plt.show()
 
 
     def train(self):
@@ -100,7 +122,7 @@ if __name__ == "__main__":
     a = detector.model["a"]
     scale = np.linalg.norm(a[0] - a[9])/np.linalg.norm(a[0] - a[9])
     a = a*scale
-    detector.test(a)
-    b=detector.points["a"][5]
-    detector.test(b)
+    detector.plot(a, "base")
+    b=detector.points["a"][0]
     b = detector.transform(a,b)
+    detector.plot(b, "transformed")
