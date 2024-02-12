@@ -60,6 +60,8 @@ def save_points(points, folder):
 def load_images(folder):
     images = []
     for file in os.listdir(folder):
+        if not file.endswith(".png"):
+            continue
         file = os.path.join(folder,file)
         img = cv.imread(file)
         images.append(img)
