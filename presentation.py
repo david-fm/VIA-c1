@@ -91,9 +91,9 @@ def __(hd, mo, points, verbose):
     if verbose.value:
         toShow=mo.md(f'''
             The result of the prediction is: {result[0]}
-            
+
             The best distances from the new example to the base examples are:
-            
+
             - To a: {result[1][0]}
             - To e: {result[1][1]}
             - To i: {result[1][2]}
@@ -158,9 +158,12 @@ def __(hd, pointsFolder):
 
 
 @app.cell
-def __(hd):
-    hd.accuracy()
-    return
+def __(hd, mo):
+    accuracy = hd.accuracy()
+    mo.md(f'''
+        The accuracy of the model is: {accuracy}
+    ''')
+    return accuracy,
 
 
 if __name__ == "__main__":
