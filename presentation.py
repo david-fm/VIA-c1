@@ -44,7 +44,7 @@ def __(HandDetector, mo):
 
 @app.cell
 def __(hd, modelFolder):
-    hd.loadModelPoints(modelFolder.value)
+    hd.loadModels(modelFolder.value)
     return
 
 

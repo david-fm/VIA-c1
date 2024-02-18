@@ -10,6 +10,7 @@ import utils
 # TODO: Marimo para ejemplificar
 
 class HandDetector():
+    """HandDetector class contains the methods and attributes to detect the hand and classify the letter"""
     def __init__(self):
         self.points = {
             "a": [],
@@ -30,10 +31,10 @@ class HandDetector():
             "u": []
         }
     
-    def loadModelPoints(self, folder):
+    def loadModels(self, folder):
         """
-            Load points from a folder with the points organized in subfoders
-            Use this method to test the model accuracy
+            Load points from a folder with the models organized in subfoders
+            The result of the predictions will be the best match to this models.
         """
 
         for subfolder in os.listdir(folder):
@@ -160,12 +161,21 @@ class HandDetector():
     
     @staticmethod
     def distanceMean(distance: list[list[int]]):
+        """Calculate the mean of the distances"""
         return np.linalg.norm( distance, axis=1).mean()
     
     def distanceMedian(distance: list[list[int]]):
         return np.median(np.linalg.norm( distance, axis=1))
 
     def predict(self, points: list[list[int]], metric="mean", verbose=False):
+        """
+            Predict the letter of the points
+            Parameters:
+                points: list of points
+                verbose: if True, return the distances to the model
+            Returns:
+                letter: letter of the points
+        """
         # Search for the most similar after the transformation
         # Get the transformed points
         transformedA = self.transform(self.model["a"], points)
@@ -202,6 +212,11 @@ class HandDetector():
         return letters[measures.index(min(measures))]
         
     def accuracy(self, metric="mean"):
+        """
+            Measure how well the model is working
+            Returns:
+                accuracy: accuracy of the model
+        """
         # Measure how well the model is working
         accuracy = 0
         num_examples = 0
@@ -222,6 +237,6 @@ if __name__ == "__main__":
 
     hd = HandDetector()
     
-    hd.loadModelPoints(MODELS_PATH)
+    hd.loadModels(MODELS_PATH)
     points = hd.getPointsFromImage(A_EXAMPLE_PATH)
     hd.predict(points, verbose=True)
