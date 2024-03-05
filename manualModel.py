@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import os
 import pickle
 import utils
+from scipy.spatial import procrustes
 
 # TODO: No tener un solor modelo de referencia sino un ensamble model con multiples ejemplos
 
@@ -68,6 +69,11 @@ class HandDetector():
         _, points = utils.get_results([image])
         return points[0]
     
+    @staticmethod
+    def dist(a,b):
+        mtx1, mtx2, disparity = procrustes(a, b)
+        return disparity
+
     def classifyImage(self, image, verbose=False):
         """
             Classify the image
@@ -85,8 +91,14 @@ class HandDetector():
         distance09 = abs(points[9] - points[0])
         # change distance09 values that are 0 to 1 to avoid division by 0
         distance09 = np.where(distance09 == 0, 1, distance09)
-        scaled_points = points/distance09
-        return scaled_points
+
+        try:
+            scaled_points = points/distance09
+            return scaled_points
+        except:
+            return points
+
+    
 
     @staticmethod
     def transform( references, to_transform):
@@ -226,6 +238,8 @@ class HandDetector():
                 if self.predict(points_example, metric=metric) == letter:
                     accuracy += 1
         
+        print(f"Accuracy: {accuracy} Num examples: {num_examples}")
+
         return accuracy/num_examples
         
 
@@ -234,9 +248,13 @@ class HandDetector():
 if __name__ == "__main__":
     MODELS_PATH = os.path.join(os.path.dirname(__file__), 'models')
     A_EXAMPLE_PATH = os.path.join(os.path.dirname(__file__), 'data','a','20240201-185821.png')
+    pointsFolder = os.path.join(os.path.dirname(__file__), 'data')
 
     hd = HandDetector()
     
     hd.loadModels(MODELS_PATH)
     points = hd.getPointsFromImage(A_EXAMPLE_PATH)
     hd.predict(points, verbose=True)
+
+    hd.loadPoints(pointsFolder)
+    hd.accuracy()

@@ -152,13 +152,8 @@ def __(mo):
 
 
 @app.cell
-def __(hd, pointsFolder):
+def __(hd, mo, pointsFolder):
     hd.loadPoints(pointsFolder.value)
-    return
-
-
-@app.cell
-def __(hd, mo):
     accuracy = hd.accuracy()
     mo.md(f'''
         The accuracy of the model is: {accuracy}
