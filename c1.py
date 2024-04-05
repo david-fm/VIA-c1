@@ -48,7 +48,7 @@ def percentage_ocupied(points, W, H):
     # print(f"W/2: {H/2}")
     #print(f"my module: {np.sqrt(moved_radio[0]**2 + moved_radio[1]**2)}")
 
-    return module/(H/2)
+    return 1.5*module/(H/2)
 
 def hand_closed(points, center):
     """Returns True if the hand is closed, False otherwise"""
